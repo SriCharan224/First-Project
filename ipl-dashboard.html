@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IPL 2025 Dashboard</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-primary: #ffffff;
+      --bg-secondary: #f5f5f3;
+      --bg-tertiary: #eeede9;
+      --text-primary: #1a1a1a;
+      --text-secondary: #6b6b6b;
+      --border: rgba(0,0,0,0.1);
+      --border-emphasis: rgba(0,0,0,0.2);
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --success-bg: rgba(99,153,34,0.08);
+      --success-text: #3B6D11;
+      --danger-text: #A32D2D;
+      --accent: #f4a11b;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f0f2f5 !important;
+      color: #1a1a1a !important;
+      min-height: 100vh;
+      padding: 24px 16px;
+    }
+
+    .container { max-width: 960px; margin: 0 auto; }
+
+    /* Header */
+    .ipl-header {
+      background: #1a1a2e;
+      border-radius: var(--radius-lg);
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .ipl-logo { display: flex; align-items: center; gap: 10px; }
+    .ipl-badge {
+      width: 40px; height: 40px;
+      background: var(--accent);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .ipl-badge i { font-size: 20px; color: #1a1a2e; }
+    .ipl-title { font-size: 20px; font-weight: 600; color: var(--accent); }
+    .ipl-sub { font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 2px; }
+    .ipl-season-label { font-size: 14px; font-weight: 500; color: rgba(255,255,255,0.75); text-align: right; }
+    .ipl-season-sub { font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 2px; }
+
+    /* Stat grid */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 1rem;
+    }
+    @media (max-width: 600px) { .stat-grid { grid-template-columns: repeat(2, 1fr); } }
+
+    .stat-card {
+      background: var(--bg-primary);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+    }
+    .stat-label { font-size: 11px; color: var(--text-secondary); margin-bottom: 4px; letter-spacing: 0.03em; }
+    .stat-value { font-size: 20px; font-weight: 600; color: var(--text-primary); line-height: 1.2; }
+    .stat-accent { color: var(--accent); }
+    .stat-note { font-size: 11px; color: var(--text-secondary); margin-top: 3px; }
+
+    /* Two column layout */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+
+    .right-col { display: flex; flex-direction: column; gap: 12px; }
+
+    /* Cards */
+    .card {
+      background: var(--bg-primary);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1rem 1.25rem;
+    }
+    .card-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+    }
+
+    /* Points table */
+    .pts-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .pts-table th {
+      color: var(--text-secondary);
+      font-weight: 400;
+      font-size: 11px;
+      text-align: right;
+      padding: 0 6px 8px;
+      letter-spacing: 0.04em;
+    }
+    .pts-table th:first-child { text-align: left; }
+    .pts-table td {
+      padding: 7px 6px;
+      border-top: 0.5px solid var(--border);
+      text-align: right;
+      color: var(--text-primary);
+    }
+    .pts-table td:first-child { text-align: left; }
+    .qual-row td { background: var(--success-bg); }
+    .pts-bold { font-weight: 600; }
+    .nrr-pos { color: var(--success-text); }
+    .nrr-neg { color: var(--danger-text); }
+    .team-name { display: flex; align-items: center; gap: 8px; }
+    .team-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .qual-note {
+      font-size: 10px;
+      color: var(--text-secondary);
+      margin-top: 8px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .qual-swatch {
+      display: inline-block;
+      width: 8px; height: 8px;
+      background: rgba(99,153,34,0.25);
+      border-radius: 2px;
+    }
+
+    /* Player rows */
+    .player-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 0;
+      border-top: 0.5px solid var(--border);
+    }
+    .player-row:first-child { border-top: none; padding-top: 0; }
+    .player-rank { font-size: 11px; color: var(--text-secondary); width: 16px; flex-shrink: 0; }
+    .player-avatar {
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+    .player-info { flex: 1; min-width: 0; }
+    .player-nm {
+      font-size: 13px; font-weight: 500;
+      color: var(--text-primary);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .player-team { font-size: 11px; color: var(--text-secondary); }
+    .player-stat { font-size: 15px; font-weight: 600; color: var(--text-primary); flex-shrink: 0; text-align: right; }
+    .player-stat-lbl { font-size: 10px; color: var(--text-secondary); text-align: right; }
+
+    /* Three column layout */
+    .three-col {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    @media (max-width: 700px) { .three-col { grid-template-columns: 1fr; } }
+
+    /* Match items */
+    .match-item { padding: 10px 0; border-top: 0.5px solid var(--border); }
+    .match-item:first-child { border-top: none; padding-top: 0; }
+    .match-round { font-size: 10px; color: var(--text-secondary); margin-bottom: 4px; }
+    .match-final-round { color: var(--accent); }
+    .match-teams { display: flex; align-items: center; justify-content: space-between; margin-bottom: 3px; }
+    .match-team { font-size: 13px; font-weight: 500; color: var(--text-primary); }
+    .match-winner { color: var(--success-text); }
+    .vs-sep { font-size: 11px; color: var(--text-secondary); }
+    .match-score { font-size: 12px; color: var(--text-secondary); }
+    .match-result { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+
+    /* Win % bars */
+    .bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .bar-row:last-child { margin-bottom: 0; }
+    .bar-label { font-size: 11px; color: var(--text-secondary); width: 34px; flex-shrink: 0; }
+    .bar-track {
+      flex: 1;
+      height: 6px;
+      background: var(--bg-secondary);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .bar-fill { height: 100%; border-radius: 3px; }
+    .bar-val { font-size: 12px; font-weight: 500; color: var(--text-primary); width: 32px; text-align: right; }
+
+    /* Highlight cards */
+    .highlight-card {
+      padding: 10px;
+      background: var(--bg-secondary);
+      border-radius: var(--radius-md);
+    }
+    .highlight-label { font-size: 10px; color: var(--text-secondary); margin-bottom: 3px; }
+    .highlight-name { font-size: 14px; font-weight: 500; color: var(--text-primary); }
+    .highlight-sub { font-size: 12px; color: var(--text-secondary); }
+
+    /* Footer */
+    .footer {
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-top: 8px;
+      padding: 0 2px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <div class="ipl-header">
+      <div class="ipl-logo">
+        <div class="ipl-badge"><i class="ti ti-cricket" aria-hidden="true"></i></div>
+        <div>
+          <div class="ipl-title">IPL Dashboard</div>
+          <div class="ipl-sub">Indian Premier League · Season stats</div>
+        </div>
+      </div>
+      <div>
+        <div class="ipl-season-label">IPL 2025</div>
+        <div class="ipl-season-sub">74 matches played</div>
+      </div>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-label">Season winner</div>
+        <div class="stat-value" style="font-size:16px;">Royal Challengers</div>
+        <div class="stat-note">Bengaluru</div>
+      </div>
+      <div class="stat-card" style="background: #fff4e0; border: 1px solid #f4a11b;">
+        <div class="stat-label" style="color: #b87000;">Orange Cap</div>
+        <div class="stat-value" style="font-size:15px; color:#c47800;">V. Kohli</div>
+        <div class="stat-note" style="color:#b87000;">741 runs</div>
+      </div>
+      <div class="stat-card" style="background: #ede8ff; border: 1px solid #7c6fcd;">
+        <div class="stat-label" style="color: #5a4fcf;">Purple Cap</div>
+        <div class="stat-value" style="font-size:15px; color:#5a4fcf;">J. Bumrah</div>
+        <div class="stat-note" style="color:#5a4fcf;">28 wickets</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Highest score</div>
+        <div class="stat-value">286<span style="font-size:14px;">/4</span></div>
+        <div class="stat-note">SRH vs MI</div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <div class="card-title">Points table</div>
+        <table class="pts-table">
+          <thead>
+            <tr>
+              <th>Team</th>
+              <th>M</th><th>W</th><th>L</th><th>NRR</th><th>Pts</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="qual-row">
+              <td><div class="team-name"><div class="team-dot" style="background:#C71C23;"></div>RCB</div></td>
+              <td>14</td><td>9</td><td>5</td><td class="nrr-pos">+0.48</td><td class="pts-bold">18</td>
+            </tr>
+            <tr class="qual-row">
+              <td><div class="team-name"><div class="team-dot" style="background:#004C93;"></div>MI</div></td>
+              <td>14</td><td>9</td><td>5</td><td class="nrr-pos">+0.31</td><td class="pts-bold">18</td>
+            </tr>
+            <tr class="qual-row">
+              <td><div class="team-name"><div class="team-dot" style="background:#FDB913;"></div>CSK</div></td>
+              <td>14</td><td>8</td><td>6</td><td class="nrr-pos">+0.21</td><td class="pts-bold">16</td>
+            </tr>
+            <tr class="qual-row">
+              <td><div class="team-name"><div class="team-dot" style="background:#FF822A;"></div>SRH</div></td>
+              <td>14</td><td>8</td><td>6</td><td class="nrr-pos">+0.14</td><td class="pts-bold">16</td>
+            </tr>
+            <tr>
+              <td><div class="team-name"><div class="team-dot" style="background:#1D4289;"></div>DC</div></td>
+              <td>14</td><td>7</td><td>7</td><td class="nrr-neg">-0.09</td><td class="pts-bold">14</td>
+            </tr>
+            <tr>
+              <td><div class="team-name"><div class="team-dot" style="background:#3A225D;"></div>KKR</div></td>
+              <td>14</td><td>7</td><td>7</td><td class="nrr-neg">-0.17</td><td class="pts-bold">14</td>
+            </tr>
+            <tr>
+              <td><div class="team-name"><div class="team-dot" style="background:#45B4C5;"></div>LSG</div></td>
+              <td>14</td><td>6</td><td>8</td><td class="nrr-neg">-0.22</td><td class="pts-bold">12</td>
+            </tr>
+            <tr>
+              <td><div class="team-name"><div class="team-dot" style="background:#EA1A85;"></div>RR</div></td>
+              <td>14</td><td>5</td><td>9</td><td class="nrr-neg">-0.35</td><td class="pts-bold">10</td>
+            </tr>
+            <tr>
+              <td><div class="team-name"><div class="team-dot" style="background:#0078BC;"></div>PBKS</div></td>
+              <td>14</td><td>5</td><td>9</td><td class="nrr-neg">-0.38</td><td class="pts-bold">10</td>
+            </tr>
+            <tr>
+              <td><div class="team-name"><div class="team-dot" style="background:#D71920;"></div>GT</div></td>
+              <td>14</td><td>4</td><td>10</td><td class="nrr-neg">-0.61</td><td class="pts-bold">8</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="qual-note"><span class="qual-swatch"></span> Qualified for playoffs (top 4)</div>
+      </div>
+
+      <div class="right-col">
+        <div class="card">
+          <div class="card-title">Top run scorers</div>
+          <div class="player-row">
+            <div class="player-rank">1</div>
+            <div class="player-avatar" style="background:#FAECE7; color:#993C1D;">VK</div>
+            <div class="player-info"><div class="player-nm">V. Kohli</div><div class="player-team">RCB</div></div>
+            <div><div class="player-stat">741</div><div class="player-stat-lbl">runs</div></div>
+          </div>
+          <div class="player-row">
+            <div class="player-rank">2</div>
+            <div class="player-avatar" style="background:#E6F1FB; color:#185FA5;">SG</div>
+            <div class="player-info"><div class="player-nm">S. Gill</div><div class="player-team">GT</div></div>
+            <div><div class="player-stat">694</div><div class="player-stat-lbl">runs</div></div>
+          </div>
+          <div class="player-row">
+            <div class="player-rank">3</div>
+            <div class="player-avatar" style="background:#EEEDFE; color:#534AB7;">RG</div>
+            <div class="player-info"><div class="player-nm">R. Gaikwad</div><div class="player-team">CSK</div></div>
+            <div><div class="player-stat">652</div><div class="player-stat-lbl">runs</div></div>
+          </div>
+          <div class="player-row">
+            <div class="player-rank">4</div>
+            <div class="player-avatar" style="background:#E1F5EE; color:#0F6E56;">KA</div>
+            <div class="player-info"><div class="player-nm">K. Abhishek</div><div class="player-team">LSG</div></div>
+            <div><div class="player-stat">618</div><div class="player-stat-lbl">runs</div></div>
+          </div>
+          <div class="player-row">
+            <div class="player-rank">5</div>
+            <div class="player-avatar" style="background:#FAEEDA; color:#854F0B;">HH</div>
+            <div class="player-info"><div class="player-nm">H. Hardik</div><div class="player-team">MI</div></div>
+            <div><div class="player-stat">589</div><div class="player-stat-lbl">runs</div></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Top wicket takers</div>
+          <div class="player-row">
+            <div class="player-rank">1</div>
+            <div class="player-avatar" style="background:#FCEBEB; color:#A32D2D;">JB</div>
+            <div class="player-info"><div class="player-nm">J. Bumrah</div><div class="player-team">MI</div></div>
+            <div><div class="player-stat">28</div><div class="player-stat-lbl">wkts</div></div>
+          </div>
+          <div class="player-row">
+            <div class="player-rank">2</div>
+            <div class="player-avatar" style="background:#EEEDFE; color:#534AB7;">YC</div>
+            <div class="player-info"><div class="player-nm">Y. Chahal</div><div class="player-team">PBKS</div></div>
+            <div><div class="player-stat">24</div><div class="player-stat-lbl">wkts</div></div>
+          </div>
+          <div class="player-row">
+            <div class="player-rank">3</div>
+            <div class="player-avatar" style="background:#EAF3DE; color:#3B6D11;">MV</div>
+            <div class="player-info"><div class="player-nm">M. Varun</div><div class="player-team">KKR</div></div>
+            <div><div class="player-stat">22</div><div class="player-stat-lbl">wkts</div></div>
+          </div>
+          <div class="player-row">
+            <div class="player-rank">4</div>
+            <div class="player-avatar" style="background:#FBEAF0; color:#993556;">AK</div>
+            <div class="player-info"><div class="player-nm">A. Khan</div><div class="player-team">SRH</div></div>
+            <div><div class="player-stat">21</div><div class="player-stat-lbl">wkts</div></div>
+          </div>
+          <div class="player-row">
+            <div class="player-rank">5</div>
+            <div class="player-avatar" style="background:#E6F1FB; color:#185FA5;">KY</div>
+            <div class="player-info"><div class="player-nm">K. Yadav</div><div class="player-team">DC</div></div>
+            <div><div class="player-stat">20</div><div class="player-stat-lbl">wkts</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="three-col">
+      <div class="card">
+        <div class="card-title">Playoff results</div>
+        <div class="match-item">
+          <div class="match-round">Qualifier 1</div>
+          <div class="match-teams">
+            <span class="match-team match-winner">RCB</span>
+            <span class="vs-sep">vs</span>
+            <span class="match-team">MI</span>
+          </div>
+          <div class="match-score">187/5 vs 164/9</div>
+          <div class="match-result">RCB won by 23 runs</div>
+        </div>
+        <div class="match-item">
+          <div class="match-round">Eliminator</div>
+          <div class="match-teams">
+            <span class="match-team match-winner">CSK</span>
+            <span class="vs-sep">vs</span>
+            <span class="match-team">SRH</span>
+          </div>
+          <div class="match-score">172/6 vs 168/8</div>
+          <div class="match-result">CSK won by 4 runs</div>
+        </div>
+        <div class="match-item">
+          <div class="match-round">Qualifier 2</div>
+          <div class="match-teams">
+            <span class="match-team match-winner">CSK</span>
+            <span class="vs-sep">vs</span>
+            <span class="match-team">MI</span>
+          </div>
+          <div class="match-score">189/4 vs 182/7</div>
+          <div class="match-result">CSK won by 7 runs</div>
+        </div>
+        <div class="match-item">
+          <div class="match-round match-final-round">Final · Narendra Modi Stadium</div>
+          <div class="match-teams">
+            <span class="match-team match-winner">RCB</span>
+            <span class="vs-sep">vs</span>
+            <span class="match-team">CSK</span>
+          </div>
+          <div class="match-score">201/5 vs 196/7</div>
+          <div class="match-result">RCB won by 5 runs</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Win % by team</div>
+        <div class="bar-row"><div class="bar-label">RCB</div><div class="bar-track"><div class="bar-fill" style="width:64%; background:#f4a11b;"></div></div><div class="bar-val">64%</div></div>
+        <div class="bar-row"><div class="bar-label">MI</div><div class="bar-track"><div class="bar-fill" style="width:64%; background:#f4a11b;"></div></div><div class="bar-val">64%</div></div>
+        <div class="bar-row"><div class="bar-label">CSK</div><div class="bar-track"><div class="bar-fill" style="width:57%; background:#888780;"></div></div><div class="bar-val">57%</div></div>
+        <div class="bar-row"><div class="bar-label">SRH</div><div class="bar-track"><div class="bar-fill" style="width:57%; background:#888780;"></div></div><div class="bar-val">57%</div></div>
+        <div class="bar-row"><div class="bar-label">DC</div><div class="bar-track"><div class="bar-fill" style="width:50%; background:#B4B2A9;"></div></div><div class="bar-val">50%</div></div>
+        <div class="bar-row"><div class="bar-label">KKR</div><div class="bar-track"><div class="bar-fill" style="width:50%; background:#B4B2A9;"></div></div><div class="bar-val">50%</div></div>
+        <div class="bar-row"><div class="bar-label">LSG</div><div class="bar-track"><div class="bar-fill" style="width:43%; background:#D3D1C7;"></div></div><div class="bar-val">43%</div></div>
+        <div class="bar-row"><div class="bar-label">RR</div><div class="bar-track"><div class="bar-fill" style="width:36%; background:#D3D1C7;"></div></div><div class="bar-val">36%</div></div>
+        <div class="bar-row"><div class="bar-label">PBKS</div><div class="bar-track"><div class="bar-fill" style="width:36%; background:#D3D1C7;"></div></div><div class="bar-val">36%</div></div>
+        <div class="bar-row"><div class="bar-label">GT</div><div class="bar-track"><div class="bar-fill" style="width:29%; background:#F1EFE8;"></div></div><div class="bar-val">29%</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Season highlights</div>
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <div class="highlight-card">
+            <div class="highlight-label">Most sixes</div>
+            <div class="highlight-name">H. Hardik</div>
+            <div class="highlight-sub">54 sixes · MI</div>
+          </div>
+          <div class="highlight-card">
+            <div class="highlight-label">Best bowling figures</div>
+            <div class="highlight-name">J. Bumrah</div>
+            <div class="highlight-sub">5/10 vs RCB</div>
+          </div>
+          <div class="highlight-card">
+            <div class="highlight-label">Best strike rate (min 200 runs)</div>
+            <div class="highlight-name">S. Samson</div>
+            <div class="highlight-sub">SR 184.3 · RR</div>
+          </div>
+          <div class="highlight-card">
+            <div class="highlight-label">Best economy (min 10 overs)</div>
+            <div class="highlight-name">R. Bishnoi</div>
+            <div class="highlight-sub">Econ 6.84 · LSG</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      Note: stats are illustrative/representative data for IPL 2025. IPL season has concluded. For verified official stats, refer to iplt20.com.
+    </div>
+
+  </div>
+</body>
+</html>
